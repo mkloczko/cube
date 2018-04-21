@@ -4,3 +4,7 @@
 [submodule "glfw"]
 	path = glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "eigen-git-mirror"]
+	path = eigen-git-mirror
+	url = https://github.com/eigenteam/eigen-git-mirror.git
+	branch = branches/3.3

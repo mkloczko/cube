@@ -18,13 +18,14 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glfw/)
 find_package(OpenGL REQUIRED)
 
 include_directories("stb/")
-include_directories("eigen/")
+include_directories("eigen-git-mirror/")
 include_directories("src/include")
 
 
 
 
-set(SOURCE_FILES "src/main.cpp" "src/IncludeGL.cpp" "src/LoadFiles.cpp")
+set(SOURCE_FILES "src/main.cpp" "src/IncludeGL.cpp" "src/LoadFiles.cpp"
+		         "src/Cube.cpp" src/include/Camera.cpp)
 add_executable(Task ${SOURCE_FILES})
 
 
