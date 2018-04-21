@@ -18,6 +18,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glfw/)
 find_package(OpenGL REQUIRED)
 
 include_directories("stb/")
+include_directories("eigen/")
 include_directories("src/include")
 
 
