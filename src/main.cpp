@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "WindowLogic.hpp"
 #include "IncludeGL.hpp"
 #include "LoadFiles.hpp"
 #include "Cube.hpp"
@@ -18,6 +19,8 @@ using Eigen::Matrix4f;
 using Eigen::Vector3f;
 using Eigen::Affine3f;
 using Eigen::Translation3f;
+
+
 
 int main(int argc, char ** argv){
 
@@ -55,6 +58,16 @@ int main(int argc, char ** argv){
 	glfwMakeContextCurrent(window);
 	getErr("Current context");
 
+    //Set user pointer for handling window logic.
+    WindowLogic logic;
+    glfwSetWindowUserPointer(window,&logic);
+
+    //Mouse callbacks.
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetCursorPosCallback(window, cursor_callback);
+    glfwSetMouseButtonCallback(window, click_callback);
+    glfwSetWindowSizeCallback(window, resize_callback);
+
 #ifdef _WIN32
     // Initialize GLEW
 	if (glewInit() != GLEW_OK) {
@@ -74,29 +87,37 @@ int main(int argc, char ** argv){
         return 3;
     }
 
-    Matrix4f proj_matrix = orthoMatrix(-0.5,0.5,-0.5,0.5,0.25,100000);
+    double x_ratio = std::max(1.0, logic.xy_ratio);
+    double y_ratio = std::min(1.0, logic.xy_ratio);
+    Matrix4f proj_matrix = proj_matrix =  projectionMatrix( -0.5*x_ratio, 0.5*x_ratio
+            , -0.5/y_ratio, 0.5/y_ratio
+            , 0.5, 1000000);
     Matrix4f view_matrix = lookAtMatrix(Vector3f(1.5,2,1.5), Vector3f(0,0,0), Vector3f(0,1,0));
-    Affine3f translation(Translation3f(-1,-0.5,0));
+    Affine3f translation(Translation3f(-0.5,-0.5,-0.5));
 
-    Matrix4f ident = Matrix4f::Identity();
 
-    cube_program.updateMatrix(proj_matrix*view_matrix);
+    cube_program.updateMatrix( proj_matrix * view_matrix * logic.scale_matrix
+                               * logic.rotation_matrix * translation.matrix());
 //    cube_program.updateMatrix();
 
-    glEnable(GL_BLEND);
-    glViewport(0, 0, 800, 600);
-    int ix = -1000;
+    glViewport(0, 0, logic.width, logic.height);
+    glEnable(GL_DEPTH_TEST);
     while(!glfwWindowShouldClose(window)){
 
-//        translation = Eigen::Affine3f(Eigen::Translation3f(0,0,ix*0.1));
-//        cube_program.updateMatrix(translation.matrix() * proj_matrix);
 
-		glClearColor(0.6,0.4,0.3,0);
+        glViewport(0, 0, logic.width, logic.height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.6,0.4,0.3,0);
         cube_program.draw(cube);
+        x_ratio = std::max(1.0, logic.xy_ratio);
+        y_ratio = std::min(1.0, logic.xy_ratio);
+        proj_matrix = projectionMatrix( -0.5*x_ratio, 0.5*x_ratio
+                                      , -0.5/y_ratio, 0.5/y_ratio
+                                      , 0.5, 1000000);
+        cube_program.updateMatrix( proj_matrix * view_matrix * logic.scale_matrix
+                                 * logic.rotation_matrix * translation.matrix());
         glfwSwapBuffers(window);
         glfwPollEvents();
-        ix++;
 	}
 
     glfwDestroyWindow(window);
