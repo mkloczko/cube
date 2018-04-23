@@ -19,7 +19,7 @@ void getErr (const char * msg){
     }
 }
 
-void printShaderInfoLog(GLuint obj, const char *fn)
+bool printShaderInfoLog(GLuint obj, const char *fn)
 {
     GLint infologLength = 0;
     GLint charsWritten  = 0;
@@ -31,13 +31,15 @@ void printShaderInfoLog(GLuint obj, const char *fn)
     {
         infoLog = new char[infologLength];
         glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
-        cerr << "From " << fn << ":";
+        cerr << "From " << fn << ": ";
         cerr <<  infoLog << endl;
         delete infoLog;
+        return false;
     }
+    return true;
 }
 
-void printProgramInfoLog(GLuint obj, const char *vfn, const char *ffn)
+bool printProgramInfoLog(GLuint obj, const char *vfn, const char *ffn)
 {
     GLint infologLength = 0;
     GLint charsWritten  = 0;
@@ -50,10 +52,12 @@ void printProgramInfoLog(GLuint obj, const char *vfn, const char *ffn)
 
         infoLog = new char[infologLength];
         glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
-        cerr << "From " << vfn << " and " << ffn << ":";
+        cerr << "From " << vfn << " and " << ffn << ": ";
         cerr <<  infoLog << endl;
         delete infoLog;
+        return false;
     }
+    return true;
 }
 
 GLuint setShaders(const char * vs, const char * fs){
@@ -81,8 +85,13 @@ GLuint setShaders(const char * vs, const char * fs){
     glLinkProgram(p);
     glUseProgram(p);
 
-    printShaderInfoLog(v, "Vertex shader");
-    printShaderInfoLog(f, "Fragment shader");
-    printProgramInfoLog(p,"Vertex","Fragment");
+    bool vertex_ok   = printShaderInfoLog(v, "Vertex shader");
+    bool fragment_ok = printShaderInfoLog(f, "Fragment shader");
+    bool program_ok  = printProgramInfoLog(p,"Vertex","Fragment");
+
+    if((vertex_ok && fragment_ok && program_ok) == false){
+        return 0;
+    }
+
     return p;
 }

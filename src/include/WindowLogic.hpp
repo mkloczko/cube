@@ -17,7 +17,7 @@ struct WindowLogic {
     //Resizing
     double width    = 800;
     double height   = 600;
-    double xy_ratio = 800/600;
+    double xy_ratio = 800.0/600.0;
 
     //Mouse clicks and movements
     bool mouse_pressed = false;

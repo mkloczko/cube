@@ -39,7 +39,7 @@ void cursor_callback(GLFWwindow* window, double x, double y){
         Affine3f ry(Affine3f(AngleAxisf(yaw, Vector3f::UnitY())));
         Affine3f rx(Affine3f(AngleAxisf(pitch, Vector3f::UnitX())));
 
-        logic->rotation_matrix = logic->rotation_matrix * ry.matrix() * rx.matrix();
+        logic->rotation_matrix = rx.matrix() * ry.matrix() * logic->rotation_matrix;
     }
 
 }

@@ -12,6 +12,7 @@ using std::vector;
 struct Cube{
     GLuint vao = 0;
     GLuint vb  = 0;
+    GLuint nb  = 0;
     GLuint tb  = 0;
 
     vector<GLuint> textures = vector<GLuint>();
@@ -26,6 +27,7 @@ struct CubeProgram{
     GLuint getProgram();
     void draw(const Cube &);
     void updateMatrix(const Eigen::Matrix4f &matrix);
+    void updateNormalMatrix(const Eigen::Matrix3f &matrix);
 
 private:
     GLuint program = 0;

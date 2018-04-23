@@ -11,8 +11,8 @@
 
 
 void getErr (const char * msg);
-void printShaderInfoLog(GLuint obj, const char *fn);
-void printProgramInfoLog(GLuint obj, const char *vfn, const char *ffn);
+bool printShaderInfoLog(GLuint obj, const char *fn);
+bool printProgramInfoLog(GLuint obj, const char *vfn, const char *ffn);
 GLuint setShaders(const char * vs, const char * fs);
 
 #endif
