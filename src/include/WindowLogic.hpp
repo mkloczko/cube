@@ -23,7 +23,8 @@ struct WindowLogic {
     bool mouse_pressed = false;
     bool mouse_delta   = false;
 
-
+    //RISKY: Additional data.
+    void * additions = nullptr;
 
     double pos_x = -1, pos_y = -1;
     double dx    = -1, dy    = -1;

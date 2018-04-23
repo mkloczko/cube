@@ -25,7 +25,7 @@ include_directories("src/include")
 
 
 set(SOURCE_FILES "src/main.cpp" "src/IncludeGL.cpp" "src/LoadFiles.cpp"
-		         "src/Cube.cpp" "src/Camera.cpp" "src/WindowLogic.cpp")
+		         "src/Cube.cpp" "src/Camera.cpp" "src/WindowLogic.cpp" src/Postprocess.cpp)
 add_executable(Task ${SOURCE_FILES})
 
 

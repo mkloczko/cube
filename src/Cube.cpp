@@ -224,6 +224,7 @@ bool Cube::initialize(const vector<Image> & imgs){
         textures[i] = imgs[i].toTexture();
         getErr("Cube::initializeCube create texture");
     }
+    return true;
 
 }
 
@@ -302,6 +303,7 @@ GLuint CubeProgram::getProgram(){
 void CubeProgram::draw(const Cube & cube, unsigned int i){
     GLuint location;
     glUseProgram(program);
+    glEnable(GL_DEPTH_TEST);
     getErr("CubeProgram::draw() - enable program");
     glBindVertexArray(cube.vao);
 

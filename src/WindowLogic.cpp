@@ -6,6 +6,7 @@
 #include <Eigen/Geometry>
 
 #include "IncludeGL.hpp"
+#include "Postprocess.hpp"
 
 using namespace Eigen;
 
@@ -73,4 +74,10 @@ void resize_callback(GLFWwindow* window, int x, int y){
     logic->width    = x;
     logic->height   = y;
     logic->xy_ratio = fl;
+
+    if(logic->additions != nullptr){
+        //Assuming this is Postprocess...
+        Postprocess * p = static_cast<Postprocess*>(logic->additions);
+        p->resize(x,y);
+    }
 }

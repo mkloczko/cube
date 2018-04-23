@@ -3,10 +3,12 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <functional>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "Postprocess.hpp"
 #include "WindowLogic.hpp"
 #include "IncludeGL.hpp"
 #include "LoadFiles.hpp"
@@ -56,6 +58,11 @@ int main(int argc, char ** argv){
         return 1;
     }
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 
     GLFWwindow * window = glfwCreateWindow(800, 600, "Test task", NULL, NULL);
 	//getErr("Visualiser create window");
@@ -66,6 +73,8 @@ int main(int argc, char ** argv){
     }
 	glfwMakeContextCurrent(window);
 	getErr("Current context");
+
+
 
     //Set user pointer for handling window logic.
     WindowLogic logic;
@@ -94,9 +103,20 @@ int main(int argc, char ** argv){
     if(!cube_program.initialize()){
         glfwDestroyWindow(window);
         glfwTerminate();
-        std::cerr << "Failed to load shaders. Quitting..." << endl;
+        std::cerr << "Failed to load cube shaders. Quitting..." << endl;
         return 3;
     }
+
+    //Initialize postprocessing.
+    Postprocess postprocess;
+    if(!postprocess.initialize()){
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        std::cerr << "Failed to load blur shaders. Quitting..." << endl;
+        return 4;
+    }
+    postprocess.resize(logic.width,logic.height);
+    logic.additions = &postprocess;
 
     //Set up matrices - projections, views, and local matrix.
     double x_ratio = std::max(1.0, logic.xy_ratio);
@@ -115,14 +135,19 @@ int main(int argc, char ** argv){
     cube_program.updateNormalMatrix(normal_matrix);
 
     //OpenGL loop.
-    glViewport(0, 0, logic.width, logic.height);
-    glEnable(GL_DEPTH_TEST);
     int frame = 0;
-    while(!glfwWindowShouldClose(window)){
-        auto t_start = high_resolution_clock::now();
+    auto cubeDrawer = [&](){
         glViewport(0, 0, logic.width, logic.height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.6,0.4,0.3,0);
+        glClearColor(0.6, 0.4, 0.3, 0);
+        cube_program.draw(cube, frame);
+    };
+
+    glViewport(0, 0, logic.width, logic.height);
+    glEnable(GL_DEPTH_TEST);
+    while(!glfwWindowShouldClose(window)){
+        auto t_start = high_resolution_clock::now();
+
 
         x_ratio = std::max(1.0, logic.xy_ratio);
         y_ratio = std::min(1.0, logic.xy_ratio);
@@ -136,7 +161,10 @@ int main(int argc, char ** argv){
 
         cube_program.updateMatrix( proj_matrix * view_model);
         cube_program.updateNormalMatrix(normal_matrix);
-        cube_program.draw(cube, frame);
+
+        postprocess.render(cubeDrawer);
+        postprocess.draw();
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();
