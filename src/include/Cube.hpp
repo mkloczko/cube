@@ -25,7 +25,7 @@ struct CubeProgram{
 
     bool initialize();
     GLuint getProgram();
-    void draw(const Cube &);
+    void draw(const Cube &, unsigned int i = 0);
     void updateMatrix(const Eigen::Matrix4f &matrix);
     void updateNormalMatrix(const Eigen::Matrix3f &matrix);
 

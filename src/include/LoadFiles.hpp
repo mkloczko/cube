@@ -17,6 +17,8 @@ struct Image{
 
     Image(const string & path);
 
+    GLuint toTexture() const;
+
     static constexpr char dir_sep = '/';
 
     static vector<Image> loadImages(const string & dir, const string & name);

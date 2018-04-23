@@ -43,3 +43,18 @@ vector<Image> Image::loadImages(const string & dir, const string & name){
     return ret;
 }
 
+GLuint Image::toTexture() const{
+    if(data == nullptr){
+        return 0;
+    }
+
+    GLuint texID;
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D,0);
+    return texID;
+}
+

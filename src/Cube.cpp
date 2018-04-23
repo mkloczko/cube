@@ -115,6 +115,7 @@ constexpr GLfloat cube_normals[6*2*3*3] = {
         0.0f, 0.0f, 1.0f
 };
 
+constexpr GLfloat crop_value = ((1920.0-1080.0)/1920.0)/2.0;
 
 constexpr GLfloat cube_texCoords[6*2*3*2] = {
 
@@ -168,15 +169,17 @@ constexpr GLfloat cube_texCoords[6*2*3*2] = {
         -1.0f, -1.0f,
         -1.0f, -1.0f,
 
+        //The cropping is implemented here
+
         //Z+
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-        1.0f, 0.0f,
+        0.0f + crop_value, 1.0f,
+        0.0f + crop_value, 0.0f,
+        1.0f - crop_value, 1.0f,
 
 
-        1.0f, 0.0f,
-        0.0f, 1.0f,
-        1.0f, 1.0f
+        1.0f - crop_value, 1.0f,
+        0.0f + crop_value, 0.0f,
+        1.0f - crop_value, 0.0f
 };
 
 
@@ -214,6 +217,14 @@ bool Cube::initialize(const vector<Image> & imgs){
     getErr("Cube::initializeCube unbind tb");
     glBindVertexArray(0);
     getErr("Cube::initializeCube unbind vao");
+
+    //Load textures.
+    textures = vector<GLuint>(imgs.size(),0);
+    for(unsigned int i = 0; i < imgs.size(); i++) {
+        textures[i] = imgs[i].toTexture();
+        getErr("Cube::initializeCube create texture");
+    }
+
 }
 
 
@@ -242,6 +253,8 @@ constexpr char fragment_shader[] = "#version 300 es\n"
         "in  highp vec3 raw_normal;\n"
         "in  highp vec2 texCoord;\n"
         "out highp vec4 outColor;\n"
+        "uniform highp sampler2D tex;\n"
+        "\n"
         "\n"
         "vec3 calcReflection(highp vec3 v, highp vec3 along){\n"
         "    v     = normalize(v);\n"
@@ -264,7 +277,7 @@ constexpr char fragment_shader[] = "#version 300 es\n"
         "    if((texCoord.x < 0.0) || (texCoord.y < 0.0)){\n"
         "        side_color = (raw_normal + vec3(1.0,1.0,1.0))/2.0;\n"
         "    } else {\n"
-        "        side_color = vec3(texCoord, 0.7);\n"
+        "        side_color = texture(tex, texCoord).xyz;\n"
         "    }\n"
         "    outColor = vec4(calcPositional(normal, position, side_color),1.0);\n"
         "}\n";
@@ -286,7 +299,7 @@ bool CubeProgram::initialize(){
 GLuint CubeProgram::getProgram(){
     return program;
 }
-void CubeProgram::draw(const Cube & cube){
+void CubeProgram::draw(const Cube & cube, unsigned int i){
     GLuint location;
     glUseProgram(program);
     getErr("CubeProgram::draw() - enable program");
@@ -311,6 +324,10 @@ void CubeProgram::draw(const Cube & cube){
     glVertexAttribPointer(location, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(location);
     getErr("CubeProgram::draw() - get tb");
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, cube.textures[i]);
+    getErr("CubeProgram::draw() - set texture");
 
     glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
     getErr("CubeProgram::draw() - draw call");

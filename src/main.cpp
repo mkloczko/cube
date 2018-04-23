@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -14,6 +16,12 @@
 using std::cout;
 using std::endl;
 using std::string;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::microseconds;
+using std::this_thread::sleep_for;
 
 using Eigen::Matrix4f;
 using Eigen::Matrix3f;
@@ -90,6 +98,7 @@ int main(int argc, char ** argv){
         return 3;
     }
 
+    //Set up matrices - projections, views, and local matrix.
     double x_ratio = std::max(1.0, logic.xy_ratio);
     double y_ratio = std::min(1.0, logic.xy_ratio);
     Matrix4f proj_matrix = proj_matrix =  projectionMatrix( -0.5*x_ratio, 0.5*x_ratio
@@ -105,15 +114,16 @@ int main(int argc, char ** argv){
     cube_program.updateMatrix(proj_matrix * view_model);
     cube_program.updateNormalMatrix(normal_matrix);
 
+    //OpenGL loop.
     glViewport(0, 0, logic.width, logic.height);
     glEnable(GL_DEPTH_TEST);
+    int frame = 0;
     while(!glfwWindowShouldClose(window)){
-
-
+        auto t_start = high_resolution_clock::now();
         glViewport(0, 0, logic.width, logic.height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.6,0.4,0.3,0);
-        cube_program.draw(cube);
+
         x_ratio = std::max(1.0, logic.xy_ratio);
         y_ratio = std::min(1.0, logic.xy_ratio);
         proj_matrix = projectionMatrix( -0.5*x_ratio, 0.5*x_ratio
@@ -126,8 +136,17 @@ int main(int argc, char ** argv){
 
         cube_program.updateMatrix( proj_matrix * view_model);
         cube_program.updateNormalMatrix(normal_matrix);
+        cube_program.draw(cube, frame);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        frame = (frame + 1) % 60;
+
+        //Enforcing 60 fps.
+        auto t_end    = high_resolution_clock::now();
+        auto to_sleep = std::max(duration_cast<microseconds>(microseconds(16666) - (t_end - t_start)), microseconds(0));
+        sleep_for(to_sleep);
 	}
 
     glfwDestroyWindow(window);
