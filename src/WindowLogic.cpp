@@ -32,7 +32,11 @@ void cursor_callback(GLFWwindow* window, double x, double y){
         return;
     }
 
-    logic->move(x,y);
+    //Scale the movement as it would be 800 x 600.
+    double new_x = (x/logic->width) *800.0;
+    double new_y = (y/logic->height)*600.0;
+
+    logic->move(new_x,new_y);
 
     if(logic->mouse_delta && logic->mouse_pressed){
         double yaw   = logic->dx/100;
