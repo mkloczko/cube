@@ -244,8 +244,8 @@ constexpr char vertex_shader[] = "#version 300 es\n"
         "   texCoord = in_texCoord;\n"
         "   normal   = normalize(normal_matrix * in_normal);\n"
         "   raw_normal = in_normal;\n"
-        "   position = in_position;\n"
         "   gl_Position  = matrix * vec4(in_position,1);\n"
+        "   position = gl_Position.xyz;\n"
         "}\n";
 
 constexpr char fragment_shader[] = "#version 300 es\n"
