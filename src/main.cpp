@@ -64,7 +64,7 @@ int main(int argc, char ** argv){
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
-    GLFWwindow * window = glfwCreateWindow(800, 600, "Test task", NULL, NULL);
+    GLFWwindow * window = glfwCreateWindow(800, 600, "Cube", NULL, NULL);
 	//getErr("Visualiser create window");
     if (!window) {
         glfwTerminate();
