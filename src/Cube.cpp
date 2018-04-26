@@ -1,5 +1,9 @@
 
+#include <string.h>
+
 #include "Cube.hpp"
+
+
 
 constexpr GLfloat cube_vertices[6*2*3*3] = {
 
@@ -183,7 +187,7 @@ constexpr GLfloat cube_texCoords[6*2*3*2] = {
 };
 
 
-bool Cube::initialize(const vector<Image> & imgs){
+bool Cube::initialize(){
     if (vao != 0){
         return false;
     }
@@ -195,6 +199,8 @@ bool Cube::initialize(const vector<Image> & imgs){
     getErr("Cube::initializeCube gen nb");
     glGenBuffers(1, &tb);
     getErr("Cube::initializeCube gen tb");
+
+
 
     GLuint location;
 
@@ -218,18 +224,18 @@ bool Cube::initialize(const vector<Image> & imgs){
     glBindVertexArray(0);
     getErr("Cube::initializeCube unbind vao");
 
-    //Load textures.
-    textures = vector<GLuint>(imgs.size(),0);
-    for(unsigned int i = 0; i < imgs.size(); i++) {
-        textures[i] = imgs[i].toTexture();
-        getErr("Cube::initializeCube create texture");
-    }
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1920, 1080, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D,0);
     return true;
 
 }
 
 
-constexpr char vertex_shader[] = "#version 300 es\n"
+constexpr char vertex_shader[] = "#version 330\n"
         "in  highp vec3 in_position;\n"
         "in  highp vec3 in_normal;\n"
         "in  highp vec2 in_texCoord;\n"
@@ -245,10 +251,10 @@ constexpr char vertex_shader[] = "#version 300 es\n"
         "   normal   = normalize(normal_matrix * in_normal);\n"
         "   raw_normal = in_normal;\n"
         "   gl_Position  = matrix * vec4(in_position,1);\n"
-        "   position = gl_Position.xyz;\n"
+        "   position = in_position;\n"
         "}\n";
 
-constexpr char fragment_shader[] = "#version 300 es\n"
+constexpr char fragment_shader[] = "#version 330\n"
         "in  highp vec3 position;\n"
         "in  highp vec3 normal;\n"
         "in  highp vec3 raw_normal;\n"
@@ -284,6 +290,9 @@ constexpr char fragment_shader[] = "#version 300 es\n"
         "}\n";
 
 bool CubeProgram::initialize(){
+    glGenBuffers(1, &pbo);
+    getErr("CubeProgram::initializeCube gen pbo");
+
     if(program == 0){
         program = setShaders(vertex_shader,fragment_shader);
 
@@ -300,7 +309,7 @@ bool CubeProgram::initialize(){
 GLuint CubeProgram::getProgram(){
     return program;
 }
-void CubeProgram::draw(const Cube & cube, unsigned int i){
+void CubeProgram::draw(const Cube & cube, const Image & img){
     GLuint location;
     glUseProgram(program);
     glEnable(GL_DEPTH_TEST);
@@ -327,16 +336,40 @@ void CubeProgram::draw(const Cube & cube, unsigned int i){
     glEnableVertexAttribArray(location);
     getErr("CubeProgram::draw() - get tb");
 
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    getErr("CubeProgram::draw() - unbind buffer");
+
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, cube.textures[i]);
-    getErr("CubeProgram::draw() - set texture");
+    glBindTexture(GL_TEXTURE_2D, cube.texture);
+    getErr("CubeProgram::draw() - bind texture");
+    if(img.data != nullptr){
+
+
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+        getErr("CubeProgram::draw() - bind pbo");
+
+
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, img.width*img.height*3, 0, GL_STREAM_DRAW);
+        getErr("CubeProgram::draw() - clean pbo");
+        GLubyte *ptr = (GLubyte*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+        getErr("CubeProgram::draw() - obtain dma to the pbo");
+        if(ptr != nullptr){
+            memcpy(ptr, img.data, img.width*img.height*3);
+            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, img.width,img.height,GL_RGB, GL_UNSIGNED_BYTE, 0);
+            getErr("CubeProgram::draw() - pbo to texture");
+        }
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        getErr("CubeProgram::draw() - unbind pbo");
+    }
+    //Texture loading:
 
     glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
     getErr("CubeProgram::draw() - draw call");
 
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    getErr("CubeProgram::draw() - unbind buffer");
+
+
     glBindVertexArray(0);
     getErr("CubeProgram::draw() - unbind vao");
 

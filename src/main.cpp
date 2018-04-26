@@ -97,7 +97,7 @@ int main(int argc, char ** argv){
 
     //Initialize the cube, and set it up.
     Cube cube;
-    cube.initialize(images);
+    cube.initialize();
 
     CubeProgram cube_program;
     if(!cube_program.initialize()){
@@ -140,7 +140,7 @@ int main(int argc, char ** argv){
         glViewport(0, 0, logic.width, logic.height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.6, 0.4, 0.3, 0);
-        cube_program.draw(cube, frame);
+        cube_program.draw(cube, images[frame]);
     };
 
     glViewport(0, 0, logic.width, logic.height);

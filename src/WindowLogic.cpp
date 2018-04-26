@@ -63,7 +63,7 @@ void scroll_callback(GLFWwindow * window, double x, double y){
 
 
     logic->scale_value = logic->scale_value + y/10;
-    logic->scale_value = std::min(2.5, std::max(0.75, logic->scale_value));
+    logic->scale_value = std::min(3.0, std::max(0.75, logic->scale_value));
     float ratio = logic->scale_value;
 
     Affine3f scale(Scaling(ratio));

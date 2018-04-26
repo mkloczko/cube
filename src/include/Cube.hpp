@@ -15,9 +15,9 @@ struct Cube{
     GLuint nb  = 0;
     GLuint tb  = 0;
 
-    vector<GLuint> textures = vector<GLuint>();
+    GLuint texture = 0;
 
-    bool initialize(const vector<Image> &);
+    bool initialize();
 };
 
 struct CubeProgram{
@@ -25,12 +25,13 @@ struct CubeProgram{
 
     bool initialize();
     GLuint getProgram();
-    void draw(const Cube &, unsigned int i = 0);
+    void draw(const Cube &, const Image & img);
     void updateMatrix(const Eigen::Matrix4f &matrix);
     void updateNormalMatrix(const Eigen::Matrix3f &matrix);
 
 private:
     GLuint program = 0;
+    GLuint pbo = 0;
 };
 
 #endif
