@@ -343,6 +343,7 @@ void CubeProgram::draw(const Cube & cube, const Image & img){
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, cube.texture);
     getErr("CubeProgram::draw() - bind texture");
+
     if(img.data != nullptr){
 
 
@@ -363,13 +364,10 @@ void CubeProgram::draw(const Cube & cube, const Image & img){
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         getErr("CubeProgram::draw() - unbind pbo");
     }
-    //Texture loading:
 
+    //Texture loading:
     glDrawArrays(GL_TRIANGLES, 0, 6*2*3);
     getErr("CubeProgram::draw() - draw call");
-
-
-
 
     glBindVertexArray(0);
     getErr("CubeProgram::draw() - unbind vao");
