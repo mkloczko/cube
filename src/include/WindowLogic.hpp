@@ -8,9 +8,7 @@
 using Eigen::Matrix4f;
 
 struct WindowLogic {
-    //Rotation matrix
     Matrix4f rotation_matrix = Matrix4f::Identity();
-    //Scale matrix
     Matrix4f scale_matrix    = Matrix4f::Identity();
     double scale_value = 1;
 

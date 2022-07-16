@@ -23,17 +23,15 @@ Eigen::Matrix4f lookAtMatrix(Eigen::Vector3f eye, Eigen::Vector3f look, Eigen::V
     s = f.cross(up.normalized());
     u = s.cross(f);
 
-
-
     m <<  s.x(),  s.y(),  s.z(), 0,
-            u.x(),  u.y(),  u.z(), 0,
-            -f.x(), -f.y(), -f.z(), 0,
-            0,      0,      0, 1;
+          u.x(),  u.y(),  u.z(), 0,
+          -f.x(), -f.y(), -f.z(), 0,
+          0,      0,      0, 1;
 
     t << 1, 0, 0, -eye.x(),
-            0, 1, 0, -eye.y(),
-            0, 0, 1, -eye.z(),
-            0, 0, 0,        1;
+         0, 1, 0, -eye.y(),
+         0, 0, 1, -eye.z(),
+         0, 0, 0,        1;
 
     Eigen::Matrix4f ret = m*t;
 
