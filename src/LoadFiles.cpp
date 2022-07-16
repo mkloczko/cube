@@ -21,7 +21,6 @@ Image::Image(const string & path){
     } else if(channels != 3){
         std::cerr << "Loaded " << channels << " instead of 3." << std::endl;
     } 
-
 }
 
 vector<Image> Image::loadImages(const string & dir, const string & name){
