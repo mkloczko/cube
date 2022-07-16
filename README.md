@@ -26,3 +26,37 @@ Running:
 ```bash
 $ ./Task ../frames
 ```
+
+## Nix build
+
+It is now also possible to build the project using nix, which will also handle dependencies. Although submodules will have to be loaded manually.
+
+```bash
+$ git submodule init
+$ git submodule update
+```
+
+To build:
+
+```bash
+$ nix-build install.nix    
+```
+
+To install the project, use:
+
+```bash
+$ nix-env -i -f install.nix
+```
+
+To try it locally, use:
+
+```bash
+$ nix-shell install.nix
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ ./Task
+```
+
+
